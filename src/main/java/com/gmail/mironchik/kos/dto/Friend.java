@@ -5,15 +5,15 @@ package com.gmail.mironchik.kos.dto;
  * Time: 16:21
  */
 public class Friend {
-    private String profileId;
+    private String uid;
     private boolean checked;
 
-    public String getProfileId() {
-        return profileId;
+    public String getUid() {
+        return uid;
     }
 
-    public void setProfileId(String profileId) {
-        this.profileId = profileId;
+    public void setUid(String uid) {
+        this.uid = uid;
     }
 
     public boolean isChecked() {

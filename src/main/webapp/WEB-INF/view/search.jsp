@@ -2,6 +2,7 @@
 <html>
 <head>
     <title>SHT Search</title>
+    <link rel="stylesheet" href="/resources/">
 </head>
 <body>
 <b>Welcome to Six Hands Theory!!!</b>

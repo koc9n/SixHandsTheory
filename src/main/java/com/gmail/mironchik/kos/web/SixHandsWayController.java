@@ -3,7 +3,10 @@ package com.gmail.mironchik.kos.web;
 import com.gmail.mironchik.kos.dto.FriendsRequest;
 import com.gmail.mironchik.kos.dto.HandShake;
 import com.gmail.mironchik.kos.dto.User;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
@@ -29,8 +32,23 @@ public class SixHandsWayController {
         return user;
     }
 
-    @RequestMapping(value = "/getfriends", method = RequestMethod.POST)
-    public @ResponseBody Map getFriends(@RequestBody FriendsRequest request, HttpSession session){
+    @RequestMapping(value = "/getchain/{step}/{id}", method = RequestMethod.GET)
+    public @ResponseBody Map getUser(@PathVariable Integer step, @PathVariable String id, HttpSession session){
+        RestTemplate  restTemplate = new RestTemplate();
+        List<HandShake> handShakes = (List<HandShake>) session.getAttribute("handShakeList");
+        List<User> userList = new ArrayList<User>();
+        for (int i = step - 1; i > 0; i--) {
+
+            Map<String, List<String>> tmp = restTemplate.getForObject("https://api.vk.com/method/friends.get?user_id=" + Integer.valueOf(id), Map.class);
+            userList.add((User) ((List) CollectionUtils.intersection(tmp.get("response"), handShakes.get(i).getOwners())).get(0));
+        }
+        Map<String, Object> result = new HashMap<String, Object>();
+        result.put("chain", userList);
+        return result;
+    }
+
+    @RequestMapping( value = "/getfriends", method = RequestMethod.POST)
+    public @ResponseBody Map getFriends(@RequestBody FriendsRequest request, HttpSession session) throws InterruptedException {
         HandShake handShake = new HandShake();
         handShake.setStep(request.getStep());
         RestTemplate restTemplate = new RestTemplate();
@@ -43,11 +61,10 @@ public class SixHandsWayController {
             }
             tmpOwners.add(Integer.valueOf(strId));
             Map<String, List<String>> tmp = restTemplate.getForObject("https://api.vk.com/method/friends.get?user_id=" + Integer.valueOf(strId), Map.class);
-            friendsSet.addAll((List<String>)tmp.get("response"));
-        }
+            friendsSet.addAll(tmp.get("response"));
+            }
 
         friendsSet.removeAll(owners);
-
 
         handShake.setOwners(new ArrayList<Integer>(owners));
 
@@ -60,6 +77,8 @@ public class SixHandsWayController {
         result.put("friends", friendsSet) ;
         return result;
     }
+
+
 
     private void saveToSessionHandShakes(HttpSession session, HandShake handShake) {
         List<HandShake> handShakeList = (List<HandShake>) session.getAttribute("handShakeList");

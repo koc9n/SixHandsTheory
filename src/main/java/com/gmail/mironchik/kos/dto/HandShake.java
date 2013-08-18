@@ -31,5 +31,4 @@ public class HandShake implements Serializable {
     public void setOwners(List<Integer> owners) {
         this.owners = owners;
     }
-
 }

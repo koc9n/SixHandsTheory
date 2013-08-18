@@ -5,8 +5,8 @@ function ShtCtrl($scope, API) {
     };
 
     $scope.ids = {
-        objectID: "",
-        destinationID: ""
+        objectID: 0,
+        destinationID: 0
     };
 
     $scope.chain = {};
@@ -32,6 +32,9 @@ function ShtCtrl($scope, API) {
         $scope.ids.destinationID = API.getUser({
             param_first: $scope.objects.destination
         }, function () {
+            $scope.step.currentOwners = [
+                $scope.ids.destinationID.id
+            ];
             $scope.$emit("start")
         });
     };
@@ -46,8 +49,8 @@ function ShtCtrl($scope, API) {
         var paramStep = $scope.step.number;
 
         var queryResult = API.getFriends({
-            param_first: paramStep,
-            param_second: paramIds
+            step: paramStep,
+            ids: paramIds
         }, function () {
             $scope.friendsList = queryResult;
             $scope.tryToFind();
@@ -55,12 +58,17 @@ function ShtCtrl($scope, API) {
     };
 
     $scope.tryToFind = function () {
-        if ($scope.friendsList.friends.indexOf($scope.ids.objectID) != -1) {
-            return $scope.$emit('found');
+        if ($scope.friendsList.friends.length != 0) {
+            if ($scope.friendsList.friends.indexOf($scope.ids.objectID.id) != -1) {
+                return $scope.$emit('found');
+            } else {
+                $scope.step.currentOwners = $scope.friendsList.friends;
+                return $scope.$emit("start");
+            }
         } else {
-            $scope.step.currentOwners = $scope.friendsList.friends;
-            return $scope.$emit("start");
+            $scope.$emit("fail");
         }
+
     };
 
     $scope.$on("found", function () {
@@ -70,7 +78,7 @@ function ShtCtrl($scope, API) {
         var chain = API.getChain({
             param_first: lastStepNumber,
             param_second: startId
-        }, function(){
+        }, function () {
             $scope.chain = chain;
             $scope.drawResult();
         })
@@ -79,6 +87,10 @@ function ShtCtrl($scope, API) {
     $scope.drawResult = function () {
         console.log($scope.chain);
     }
+
+    $scope.$on("fail", function(){
+        alert("fail");
+    })
 
 
 }

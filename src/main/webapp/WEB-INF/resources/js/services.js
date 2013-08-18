@@ -3,9 +3,9 @@ angular.module('shtServices', ['ngResource']).
         return $resource('/:method/:param_first/:param_second', {
             method: "@method",
             param_first: "@param_first",
-            param_second: "@method"
+            param_second: "@param_second"
         }, {
-            getFriends: {method: "GET", params: {method: "getfriends"}},
+            getFriends: {method: "POST", params: {method: "getfriends"}},
             getUser: {method: "GET", params: {method: "getuser"}},
             getChain: {method: "GET", params: {method: "getchain"}}
         });

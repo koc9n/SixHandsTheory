@@ -1,5 +1,6 @@
 package com.gmail.mironchik.kos.web;
 
+import com.gmail.mironchik.kos.dto.FriendsRequest;
 import com.gmail.mironchik.kos.dto.HandShake;
 import com.gmail.mironchik.kos.dto.User;
 import org.apache.commons.lang3.StringUtils;
@@ -28,13 +29,13 @@ public class SixHandsWayController {
         return user;
     }
 
-    @RequestMapping(value = "/getfriends/{step}/{ids}", method = RequestMethod.GET)
-    public @ResponseBody Map getFriends(@PathVariable String ids, @PathVariable Integer step, HttpSession session){
+    @RequestMapping(value = "/getfriends", method = RequestMethod.POST)
+    public @ResponseBody Map getFriends(@RequestBody FriendsRequest request, HttpSession session){
         HandShake handShake = new HandShake();
-        handShake.setStep(step);
+        handShake.setStep(request.getStep());
         RestTemplate restTemplate = new RestTemplate();
         Set<String> friendsSet = new HashSet<String>();
-        String[] strIds = StringUtils.split(ids, ",");
+        String[] strIds = StringUtils.split(request.getIds(), ",");
         Set<Integer> tmpOwners = new HashSet<Integer>();
         for (String strId : strIds){
             if (session.getAttribute("owners") != null) {

@@ -9,6 +9,12 @@ function ShtCtrl($scope, API) {
         destinationID: 0
     };
 
+    $scope.search_finished = false;
+
+    $scope.display = {
+        statusMessage: "Начинаем..."
+    }
+
     $scope.chain = {};
 
     $scope.friendsList = {};
@@ -26,6 +32,7 @@ function ShtCtrl($scope, API) {
     });
 
     $scope.fillUsersIDs = function () {
+        $scope.display.statusMessage = "Узнаем кое что об объектах...";
         $scope.ids.objectID = API.getUser({
             param_first: $scope.objects.user
         });
@@ -44,6 +51,7 @@ function ShtCtrl($scope, API) {
     });
 
     $scope.makeStep = function () {
+        $scope.display.statusMessage = "Чешим затылок...";
         $scope.step.number++
         var paramIds = $scope.step.currentOwners.join();
         var paramStep = $scope.step.number;
@@ -58,6 +66,7 @@ function ShtCtrl($scope, API) {
     };
 
     $scope.tryToFind = function () {
+        $scope.display.statusMessage = "Тыкаем пальцем в небо...";
         if ($scope.friendsList.friends.length != 0) {
             if ($scope.friendsList.friends.indexOf($scope.ids.objectID.id) != -1) {
                 return $scope.$emit('found');
@@ -72,8 +81,9 @@ function ShtCtrl($scope, API) {
     };
 
     $scope.$on("found", function () {
+        $scope.display.statusMessage = "УРА!! Нашли...";
         var lastStepNumber = $scope.step.number;
-        var startId = $scope.ids.objectID;
+        var startId = $scope.ids.objectID.id;
 
         var chain = API.getChain({
             param_first: lastStepNumber,
@@ -85,11 +95,14 @@ function ShtCtrl($scope, API) {
     });
 
     $scope.drawResult = function () {
+        $scope.display.statusMessage = "На этом всё...";
+        $scope.search_finished = true;
         console.log($scope.chain);
     }
 
     $scope.$on("fail", function(){
-        alert("fail");
+        $scope.display.statusMessage = "К сожалению ничего не вышло...";
+        console.log("fail");
     })
 
 

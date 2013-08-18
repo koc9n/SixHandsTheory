@@ -11,6 +11,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
+import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpSession;
 import java.util.*;
 
@@ -23,12 +24,16 @@ public class SixHandsWayController {
 
     private Set<Integer> owners = new HashSet<Integer>();
 
+    @PostConstruct public void init() {
+
+    }
+
     @RequestMapping(value = "/getuser/{id}", method = RequestMethod.GET)
     public @ResponseBody User getUser(@PathVariable String id){
         RestTemplate restTemplate = new RestTemplate();
         Map<String, List<Map<String, Object>>> tmp = restTemplate.getForObject("https://api.vk.com/method/users.get?user_ids=" + id + "&fields=screen_name,photo_200_orig", Map.class);
         User user = new User();
-        Map resp = (Map) tmp.get("response");
+        Map resp = (Map) ((List) tmp.get("response")).get(0);
         fillUser(user, resp);
         return user;
     }

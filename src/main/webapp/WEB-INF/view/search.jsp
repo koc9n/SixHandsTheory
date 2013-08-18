@@ -39,10 +39,10 @@
                 <table class="table table-bordered table-striped table-hover sht-table">
                     <tr>
                         <th>
-                            {{ objects.user }}
+                            {{ objects.user }} - {{ids.objectID.name}}
                         </th>
                         <th>
-                            {{ objects.destination }}
+                            {{ objects.destination }} - {{ids.destinationID.name}}
                         </th>
                     </tr>
                 </table>
@@ -51,14 +51,16 @@
                     <img src="/resources/images/loading_animation.gif" alt=""/>
                 </div>
                 <div class="chain pull-left" ng-show="search_finished">
-                    <div class="arrow">
-                        <img src="/resources/images/arrow-down-icon.png" alt=""/>
-                    </div>
-                    <div class="user">
-                        <img class="img-circle" src="http://cs322221.vk.me/v322221664/2f81/-4cm9G4EK9s.jpg" alt=""/>
+                    <div ng-repeat="cell in resultChain">
+                        <div ng-show="!$first" class="arrow">
+                            <img style="height:50px;" ng-src="/resources/images/arrow-down-icon.png" alt=""/>
+                        </div>
+                        <div class="user">
+                            <img style="width:100px;" class="img-circle" ng-src="{{cell.phlink}}" alt=""/>
 
-                        <div class="username">
-                            Ирина Савчук
+                            <div class="username">
+                                {{cell.name}}
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -74,10 +76,10 @@
                         </tr>
                         <tr>
                             <td>
-                                Step
+                                Steps
                             </td>
                             <td>
-                                 {{ step.number }}
+                                {{ step.number }}
                             </td>
                         </tr>
                         <tr>

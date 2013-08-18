@@ -6,7 +6,7 @@ angular.module("sht", ['shtServices']).
     filter('cut',function () {
         return function (input) {
             if (input.length > 30)
-                input = input.substr(0, 200) + "...";
+                input = input.substr(0, 50) + "...";
 
             return input;
         }

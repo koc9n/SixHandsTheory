@@ -15,6 +15,8 @@ function ShtCtrl($scope, API) {
         statusMessage: "Начинаем..."
     }
 
+    $scope.resultChain = [];
+
     $scope.chain = {};
 
     $scope.friendsList = {};
@@ -89,7 +91,7 @@ function ShtCtrl($scope, API) {
             param_first: lastStepNumber,
             param_second: startId
         }, function () {
-            $scope.chain = chain;
+            $scope.chain = chain.chain;
             $scope.drawResult();
         })
     });
@@ -97,10 +99,22 @@ function ShtCtrl($scope, API) {
     $scope.drawResult = function () {
         $scope.display.statusMessage = "На этом всё...";
         $scope.search_finished = true;
-        console.log($scope.chain);
+        var firstCell = API.getUser({
+            param_first: $scope.ids.objectID.id
+        }, function () {
+            $scope.resultChain.push(firstCell);
+            for (var i in $scope.chain) {
+                $scope.resultChain.push(API.getUser({
+                    param_first: $scope.chain[i].id
+                }));
+            }
+
+
+        });
+
     }
 
-    $scope.$on("fail", function(){
+    $scope.$on("fail", function () {
         $scope.display.statusMessage = "К сожалению ничего не вышло...";
         console.log("fail");
     })

@@ -39,10 +39,11 @@ public class SixHandsWayController {
         return user;
     }
 
-    private void fillUser(User user, Map resp) {
+    private User fillUser(User user, Map resp) {
         user.setId((Integer) resp.get("uid"));
         user.setName((String)resp.get("first_name") + resp.get("last_name"));
         user.setPhlink((String) resp.get("photo_200_orig"));
+        return user;
     }
 
     @RequestMapping(value = "/getchain/{step}/{id}", method = RequestMethod.GET)
@@ -69,6 +70,114 @@ public class SixHandsWayController {
         session.invalidate();
         return result;
     }
+    private Map findMutualFriendAndStep(Integer firstId, Integer secondId) {
+        int step = 0;
+
+        Set<Integer> firstFriends = new HashSet<Integer>();
+        Set<Integer> secondFriends = new HashSet<Integer>();
+        Set<Integer> firstParents = new HashSet<Integer>();
+        Set<Integer> secondParents = new HashSet<Integer>();
+        firstFriends.add(firstId);
+        secondFriends.add(secondId);
+        firstParents.add(firstId);
+        secondParents.add(secondId);
+        while (getMutualFriend(firstFriends, secondFriends) == null) {
+            ++step;
+            switch (step%2) {
+                case 1 :
+                    secondFriends.addAll(findFriends(secondParents));
+                    Set tmp1 = secondParents;
+                    secondParents = findFriends(secondParents);
+                    secondParents.removeAll(tmp1);
+                    break;
+                case 0:
+                    firstFriends.addAll(findFriends(firstParents));
+                    Set tmp2 = firstParents;
+                    firstParents = findFriends(firstParents);
+                    firstParents.removeAll(tmp2);
+                    break;
+            }
+        }
+        Map res = new HashMap();
+        res.put("step", step);
+        res.put("friend", getMutualFriend(firstFriends, secondFriends).iterator().next());
+//        res.put("startStep",1);
+//        res.put("first", firstId);
+//        res.put("second", secondId);
+//        res.put("first", firstId);
+//        res.put("second", secondId);
+        return res;
+    }
+
+    private Map calculateChain(Map chain, Integer step) {
+        Integer first = null;
+        Integer second = null;
+        Integer firstS = null;
+        Integer secondS = null;
+        for(Integer i = 0; i <= step; i++){
+            if (second == null){
+                if (first == null) {
+                    if(chain.get(i) == null) {
+                        first = i-1;
+                        firstS = (Integer) chain.get(i - 1);
+                    }
+                } else {
+                    if(chain.get(i) != null) {
+                        second = i;
+                        secondS = (Integer) chain.get(i);
+                    }
+                }
+            }
+        }
+        if (first == null) return chain;
+        Map mfS = findMutualFriendAndStep(firstS, secondS);
+        chain.put((first + second)/2,mfS.get("friend"));
+        return calculateChain(chain, step);
+    }
+
+    @RequestMapping(value = "/findchain/{firstId}/{secondId}", method = RequestMethod.GET)
+    public @ResponseBody Map findchain(@PathVariable Integer firstId, @PathVariable Integer secondId) {
+        Map findMutualResult = new HashMap();
+        findMutualResult = findMutualFriendAndStep(firstId,secondId);
+        Integer step = (Integer) findMutualResult.get("step");
+        Map chain = new HashMap();
+        chain.put(0,firstId);
+        chain.put(step, secondId);
+        chain.put(step / 2, findMutualResult.get("friend"));
+        chain = calculateChain(chain, (Integer) findMutualResult.get("step"));
+        Map chainResult = new HashMap();
+        chainResult.put("step", step);
+        chainResult.put("chain", chain);
+        return chainResult;
+    }
+
+    private Set<Integer> findFriends(Set<Integer> ids) {
+        Set<Integer> result = new HashSet();
+        for (Integer id : ids) {
+            if (id != null){
+                Collection tmp = (Collection) restTemplate
+                        .getForObject("https://api.vk.com/method/friends.get?user_id="
+                                + id, Map.class).get("response");
+                if (tmp != null) {
+                    result.addAll(tmp);
+                }
+            }
+        }
+        return  result;
+    }
+
+    private Collection getMutualFriend(Set<Integer> f_ids, Set<Integer> s_ids){
+        if (f_ids == null || s_ids == null || f_ids.isEmpty() || s_ids.isEmpty()){
+            return null;
+        }
+        Collection result = CollectionUtils.intersection(f_ids, s_ids);
+        if (result == null || result.isEmpty()){
+            return null;
+        } else {
+            return result;
+        }
+    }
+
 
     @RequestMapping( value = "/getfriends", method = RequestMethod.POST)
     public @ResponseBody Map getFriends(@RequestBody FriendsRequest request, HttpSession session) throws InterruptedException {
@@ -86,7 +195,7 @@ public class SixHandsWayController {
                 tmpOwners.add(Integer.valueOf(strId));
                 Map<String, List<String>> tmp = restTemplate.getForObject("https://api.vk.com/method/friends.get?user_id=" + Integer.valueOf(strId), Map.class);
                 if (tmp.get("response") != null) friendsSet.addAll(tmp.get("response"));
-                restTemplate.wait(50L);
+                restTemplate.wait(250L);
             }
         }
 

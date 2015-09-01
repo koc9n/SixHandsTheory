@@ -7,7 +7,7 @@ package com.gmail.mironchik.kos.dto;
 public class User {
     private Integer id;
     private String name;
-    private String phlink;
+    private String photoLink;
 
     public Integer getId() {
         return id;
@@ -25,11 +25,11 @@ public class User {
         this.name = name;
     }
 
-    public String getPhlink() {
-        return phlink;
+    public String getPhotoLink() {
+        return photoLink;
     }
 
-    public void setPhlink(String phlink) {
-        this.phlink = phlink;
+    public void setPhotoLink(String photoLink) {
+        this.photoLink = photoLink;
     }
 }

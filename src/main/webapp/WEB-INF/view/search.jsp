@@ -56,7 +56,7 @@
                             <img style="height:50px;" ng-src="/resources/images/arrow-down-icon.png" alt=""/>
                         </div>
                         <div class="user">
-                            <img style="width:100px;" class="img-circle" ng-src="{{cell.phlink}}" alt=""/>
+                            <img style="width:100px;" class="img-circle" ng-src="{{cell.photoLink}}" alt=""/>
 
                             <div class="username">
                                 {{cell.name}}
